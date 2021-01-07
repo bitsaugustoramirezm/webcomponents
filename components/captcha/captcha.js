@@ -1,83 +1,111 @@
 const captchaEvent = new CustomEvent('captcha', { detail: {validity: false}, bubbles: true });
-const captchaKeyDownEvent = new CustomEvent('captchaKeyDown', {bubbles: true });
 
 class bitsCaptcha extends HTMLElement {
 
   constructor() {
     super();
+    this.attachShadow({ mode: 'open' });
     this.path = "/components/captcha/";
+    this.formId;
   }
 
+  // Atributos para recibir mensajes dinamicamente del padre.
   static get observedAttributes() {
     return ['data-form-reset'];
   }
 
+  // Responder a mensajes del padre.
   attributeChangedCallback(name, oldValue, newValue) {
-    if (name == 'data-form-reset' && this.shadowRoot != null) {
-      this.shadowRoot.querySelector('#bits_captcha').classList.remove("error");
+    var captcha = this.shadowRoot.querySelector('#bits_captcha');
+    if (name == 'data-form-reset' && captcha != null) {
+      captcha.classList.remove("error");
     }
   }
 
   async connectedCallback() {
-    const formId = this.getAttribute('data-form-id');
+    this.formId = this.getAttribute('data-form-id');
+    // Html por defecto en caso de que no cargue el template html.
+    this.shadowRoot.innerHTML = '<div>Cargando...</div>';
+    // Carga del template html.
+    var template = await fetch(this.path + 'captcha.html');
+    this.shadowRoot.innerHTML = await template.text();
+    // Obtención de la imágen para el captcha en el backend.
+    this.loadImage();
+    // Listeners.
+    document.getElementById(this.formId).addEventListener("submit", this);
+    this.shadowRoot.querySelector('.update').addEventListener('click', this);
+    this.shadowRoot.querySelector('.code').addEventListener('keydown', this);
+  }
 
-    let shadowRoot = this.attachShadow({mode: 'open'});
-    shadowRoot.innerHTML = '<div>Cargando...</div>';
-
-    this.loadImage(shadowRoot, formId);
-
-    let res = await fetch(this.path + 'captcha.html');
-    shadowRoot.innerHTML = await res.text();
-
-    this.shadowRoot.querySelector('.update').addEventListener('click', (function () {
-      this.loadImage(shadowRoot,formId);
-    }).bind(this));
-
-    document.getElementById(formId).addEventListener("submit", (function (e) {
-      e.preventDefault();
-      var code = shadowRoot.querySelector('.code').value;
-      this.validate(code, formId);
+  // Handler para eventos escuchados.
+  handleEvent(event) {
+    if (event.type === "submit") {
+      event.preventDefault();
+      var code = this.shadowRoot.querySelector('.code').value;
+      this.validate(code);
       return false;
-    }).bind(this));
-
-    this.shadowRoot.querySelector('.code').addEventListener('keydown', (function () {
+    }
+    if (event.type === "keydown") {
+      const captchaKeyDownEvent = new CustomEvent('captchaKeyDown', {
+        bubbles: true,
+        composed: true,
+      });
       this.shadowRoot.querySelector('#bits_captcha').classList.remove("error");
       this.dispatchEvent(captchaKeyDownEvent);
-    }).bind(this));
-
+    }
+    if (event.type === "click") {
+      this.loadImage();
+    }
   }
 
-  loadImage(shadowRoot, formId) {
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function () {
-      if (this.readyState == 4 && this.status == 200) {
-        var imageCaptcha = JSON.parse(this.responseText).captcha_image;
-        shadowRoot.querySelector('.image-captcha').setAttribute('src', imageCaptcha);
-      }
-    };
-    xmlhttp.open("POST", this.path + "captcha.php", true);
-    xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    xmlhttp.send("op=get&formId="+formId);
+  // Obtiene el valor para el atributo src de la imagen captcha.
+  // Generado en backend.
+  loadImage() {
+    var url = this.path + "captcha.php";
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json, text/plain, */*',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: "op=get&formId=" + this.formId
+    })
+    .then(res => res.json())
+    .then(res => {
+      var imageCaptcha = res.captcha_image;
+      this.shadowRoot.querySelector('.image-captcha').setAttribute('src', imageCaptcha);
+    })
+    .catch(function (e) {
+      console.log("Fetch captcha.php error.");
+    });
   }
 
-  validate(code, formId) {
-    var xmlhttp = new XMLHttpRequest();
-    var element = this;
-    xmlhttp.onreadystatechange = function () {
-      if (this.readyState == 4 && this.status == 200) {
-        var captchaValidity = JSON.parse(this.responseText).captcha_validity;
-        captchaEvent.detail.validity = captchaValidity;
-        element.dispatchEvent(captchaEvent);
-        if (captchaValidity === false) {
-          element.shadowRoot.querySelector('#bits_captcha').classList.add("error");
-        }
+  // Valída código introducido por usuario en backend.
+  validate(code) {
+    var url = this.path + "captcha.php";
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json, text/plain, */*',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: "op=validate&formId=" + this.formId + "&code=" + code
+    })
+    .then(res => res.json())
+    .then(res => {
+      var captchaValidity = res.captcha_validity;
+      captchaEvent.detail.validity = captchaValidity;
+      this.dispatchEvent(captchaEvent);
+      if (captchaValidity === false) {
+        this.shadowRoot.querySelector('#bits_captcha').classList.add("error");
       }
-    };
-    xmlhttp.open("POST", this.path + "captcha.php", true);
-    xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    xmlhttp.send("op=validate&formId="+formId+"&code="+code);
+    })
+    .catch(function (e) {
+      console.log("Fetch captcha.php error.");
+    });
   }
 
 }
 
+// Definición de elemento custom.
 window.customElements.define('bits-captcha', bitsCaptcha);

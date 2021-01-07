@@ -62,19 +62,18 @@
         inputs[i].addEventListener('focus', e => {
           if (notice.length > 0) {
             notice[0].remove();
-            console.log('focus');
             // Mensaje de reset estilo para el componente.
             var componente = document.getElementsByTagName('bits-captcha')[0];
             componente.setAttribute('data-form-reset', true);
           }
         });
-        // Escuchar evento captchaKeyDown para limpiar mensaje de error.
-        form.addEventListener('captchaKeyDown', e => {
-          if (notice.length > 0) {
-            notice[0].remove();
-          }
-        });
       }
+      // Escuchar evento captchaKeyDown para limpiar mensaje de error.
+      form.addEventListener('captchaKeyDown', e => {
+        if (notice.length > 0) {
+          notice[0].remove();
+        }
+      });
 
     </script>
 
