@@ -1,0 +1,48 @@
+body {
+  background-color: #e1e1e1;
+  font-size: 20px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+form {
+  width: 50%;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: white;
+  box-shadow: peru;
+}
+
+label {
+  display: inline-block;
+  width: 200px;
+}
+
+input {
+  height: 30px;
+  width: 200px;
+  font-size: 20px;
+}
+
+.field, .actions {
+  width: fit-content;
+  margin: 20px auto;
+  display: block;
+}
+
+h1 {
+  text-align: center;
+}
+
+.actions input {
+  padding: 10px;
+  height: unset;
+  font-size: 30px;
+  background-color: black;
+  color: white;
+}
+
+.notice {
+  color: white;
+  background-color: tomato;
+  padding: 0.5em 2em;
+}
