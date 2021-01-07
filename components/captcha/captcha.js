@@ -1,5 +1,3 @@
-const captchaEvent = new CustomEvent('captcha', { detail: {validity: false}, bubbles: true });
-
 class bitsCaptcha extends HTMLElement {
 
   constructor() {
@@ -41,11 +39,18 @@ class bitsCaptcha extends HTMLElement {
   handleEvent(event) {
     if (event.type === "submit") {
       event.preventDefault();
+      // Evento custom captcha.
+      const captchaEvent = new CustomEvent('captcha', {
+        detail: { validity: false },
+        bubbles: true,
+        composed: true,
+      });
       var code = this.shadowRoot.querySelector('.code').value;
-      this.validate(code);
+      this.validate(code, captchaEvent);
       return false;
     }
     if (event.type === "keydown") {
+      // Evento custom captchaKeyDown.
       const captchaKeyDownEvent = new CustomEvent('captchaKeyDown', {
         bubbles: true,
         composed: true,
@@ -56,6 +61,32 @@ class bitsCaptcha extends HTMLElement {
     if (event.type === "click") {
       this.loadImage();
     }
+  }
+
+  // Valída código introducido por usuario en backend.
+  // Lanza evento captcha.
+  validate(code, captchaEvent) {
+    var url = this.path + "captcha.php";
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json, text/plain, */*',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: "op=validate&formId=" + this.formId + "&code=" + code
+    })
+    .then(res => res.json())
+    .then(res => {
+      var captchaValidity = res.captcha_validity;
+      captchaEvent.detail.validity = captchaValidity;
+      this.dispatchEvent(captchaEvent);
+      if (captchaValidity === false) {
+        this.shadowRoot.querySelector('#bits_captcha').classList.add("error");
+      }
+    })
+    .catch(function (e) {
+      console.log("Fetch captcha.php error.");
+    });
   }
 
   // Obtiene el valor para el atributo src de la imagen captcha.
@@ -74,31 +105,6 @@ class bitsCaptcha extends HTMLElement {
     .then(res => {
       var imageCaptcha = res.captcha_image;
       this.shadowRoot.querySelector('.image-captcha').setAttribute('src', imageCaptcha);
-    })
-    .catch(function (e) {
-      console.log("Fetch captcha.php error.");
-    });
-  }
-
-  // Valída código introducido por usuario en backend.
-  validate(code) {
-    var url = this.path + "captcha.php";
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json, text/plain, */*',
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: "op=validate&formId=" + this.formId + "&code=" + code
-    })
-    .then(res => res.json())
-    .then(res => {
-      var captchaValidity = res.captcha_validity;
-      captchaEvent.detail.validity = captchaValidity;
-      this.dispatchEvent(captchaEvent);
-      if (captchaValidity === false) {
-        this.shadowRoot.querySelector('#bits_captcha').classList.add("error");
-      }
     })
     .catch(function (e) {
       console.log("Fetch captcha.php error.");
