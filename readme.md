@@ -1,4 +1,4 @@
-Web Components
+Web Component Captcha
 ===
 
 Uso
@@ -8,7 +8,7 @@ Uso
     `<script src="/components/captcha_m/captcha.js"></script>`
 
 
-2. Use el componente en su HTML. Este componente debe ir ubicado dentro de un elemento <form>.
+2. Use el componente en su HTML. Este componente debe ir ubicado dentro de un elemento `<form>`.
 
   `<bits-captcha data-form-id="login" data-form-reset=false class="field">
   </bits-captcha>`
