@@ -1,18 +1,18 @@
-Web Components
+Web Component Captcha
 ===
 
 Uso
 ==
 1. Agregue el script del componente en el header de su aplicación. De acuerdo a la ubicación de los componentes en su instalación.
-{code}
-    <script src="/components/captcha_m/captcha.js"></script>
-{code}
 
-2. Use el componente en su HTML. Este componente debe ir ubicado dentro de un elemento <form>.
-{code}
-  <bits-captcha data-form-id="login" data-form-reset=false class="field">
-  </bits-captcha>
-{code}
+    `<script src="/components/captcha_m/captcha.js"></script>`
+
+
+2. Use el componente en su HTML. Este componente debe ir ubicado dentro de un elemento `<form>`.
+
+  `<bits-captcha data-form-id="login" data-form-reset=false class="field">
+  </bits-captcha>`
+
 
 El componente tiene los siguientes atributos obligatorios.
 - *data-form-id* para indicar el id del formulario padre.
