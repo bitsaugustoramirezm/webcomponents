@@ -1,0 +1,81 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Demo 3</title>
+    <script src="/components/captchajs/captcha.js"></script>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+
+    <form id="login" method="POST" action="page.html">
+      <h1>Inicio de sesión</h1>
+      <div class="field">
+        <label>
+          Usuario
+        </label>
+        <input type="text" name="user" />
+      </div>
+      <div class="field">
+        <label>
+          Contraseña
+        </label>
+        <input type="password" name="password"/>
+      </div>
+
+      <bits-captcha data-form-id="login" data-form-reset=false class="field">
+      </bits-captcha>
+      <div class="actions">
+        <input type="submit" value="Ingresar">
+      </div>
+    </form>
+
+    <script>
+      // Formulario.
+      var form = document.getElementById('login');
+      // Mensaje de error.
+      var notice = form.getElementsByClassName('notice');
+      // Validación de campos del fomulario.
+      function validateFields() {
+        return true;
+      }
+      // Escuchar evento captcha para determinar cuando
+      // hacer el submir del formulario, en función de
+      // validación de campos.
+      form.addEventListener('captcha', e => {
+        console.log('event captcha', e.detail.validity);
+        if (e.detail.validity === true && validateFields()) {
+          form.submit();
+        }
+        else {
+          // Escribir mensaje de error.
+          var notice = document.createElement("div");
+          var content = document.createTextNode('Valor incorrecto.');
+          notice.classList.add("field", "notice");
+          notice.appendChild(content);
+          form.firstElementChild.after(notice);
+        }
+      });
+      // Limpiar mensaje de error.
+      // Enviar mensaje al componente para resetear estilo.
+      var inputs = form.getElementsByTagName('input');
+      for (var i = 0; i < inputs.length; i++) {
+        inputs[i].addEventListener('focus', e => {
+          if (notice.length > 0) {
+            notice[0].remove();
+            // Mensaje de reset estilo para el componente.
+            var componente = document.getElementsByTagName('bits-captcha')[0];
+            componente.setAttribute('data-form-reset', true);
+          }
+        });
+      }
+      // Escuchar evento captchaKeyDown para limpiar mensaje de error.
+      form.addEventListener('captchaKeyDown', e => {
+        if (notice.length > 0) {
+          notice[0].remove();
+        }
+      });
+
+    </script>
+
+  </body>
+</html>

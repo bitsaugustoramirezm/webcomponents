@@ -19,10 +19,12 @@ El componente tiene los siguientes atributos obligatorios.
 - *data-form-reset* se puede ajustar dinámicamente en true, para resetear el estilo de error del componente.
 
 Demo root files
- /demo1/index.html
- /demo2/index.html
+- /demo1/index.html   Archivos js, html y css separados
+- /demo2/index.html   Archivos js, html y css juntos
+- /demo3/index.html   Versión full javascript
 
- Nota: El formulario de prueba es sólo un dummy.
+Nota 1: El formulario de prueba es sólo un dummy.
+Nota 2: Las dos primeras versiones consumen una clase php en el backedn para generar y validar el captcha, la tercera versión funciona completamente en javascriot sin usar php.
 
 Características:
 
