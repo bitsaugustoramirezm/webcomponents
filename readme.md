@@ -1,6 +1,28 @@
 Web Components
 ===
-Demo root file:  /demo1/index.html
+
+Uso
+==
+1. Agregue el script del componente en el header de su aplicación. De acuerdo a la ubicación de los componentes en su instalación.
+{code}
+    <script src="/components/captcha_m/captcha.js"></script>
+{code}
+
+2. Use el componente en su HTML. Este componente debe ir ubicado dentro de un elemento <form>.
+{code}
+  <bits-captcha data-form-id="login" data-form-reset=false class="field">
+  </bits-captcha>
+{code}
+
+El componente tiene los siguientes atributos obligatorios.
+- *data-form-id* para indicar el id del formulario padre.
+- *data-form-reset* se puede ajustar dinámicamente en true, para resetear el estilo de error del componente.
+
+Demo root files
+ /demo1/index.html
+ /demo2/index.html
+
+ Nota: El formulario de prueba es sólo un dummy.
 
 Características:
 
@@ -9,5 +31,3 @@ Características:
 -	Padre ajusta el id del captcha, que debe ser igual al id del formulario al que se asigna.
 -	Captcha envía evento captcha cuando hace validación, en detail.validity se consulta estado de la validación. El padre usa esto para setear mensaje de error.
 -	Captcha envía evento captchaKeyDown cuando usuario va ingresando código. El padre puede usar esto para resetear mensajes de error.
-
-El formulario de prueba es sólo un dummy.
